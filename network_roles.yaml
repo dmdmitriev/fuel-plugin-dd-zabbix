@@ -1,0 +1,8 @@
+- id: "zabbix"
+  default_mapping: "management"
+  properties:
+    subnet: true
+    gateway: false
+    vip:
+      - name: "zbx_vip_mgmt"
+        namespace: "haproxy"
