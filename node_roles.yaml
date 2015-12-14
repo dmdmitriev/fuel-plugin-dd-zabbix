@@ -1,0 +1,8 @@
+zabbix:
+  name: "Zabbix server"
+  description: "Zabbix dedicated server"
+  conflicts:
+    - controller
+    - compute
+  limits:
+    min: 1

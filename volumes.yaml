@@ -1,0 +1,20 @@
+volumes:
+  - id: "zabbix"
+    type: "vg"
+    min_size:
+      generator: "calc_gb_to_mb"
+      generator_args: [20]
+    label: "MySQL DB"
+    volumes:
+      - mount: "/var/lib/mysql"
+        type: "lv"
+        name: "mysql"
+        file_system: "ext4"
+        size:
+          generator: "calc_total_vg"
+          generator_args: ["zabbix"]
+
+volumes_roles_mapping:
+  zabbix:
+    - {allocate_size: "min", id: "os"}
+    - {allocate_size: "all", id: "zabbix"}
