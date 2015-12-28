@@ -23,15 +23,20 @@ define plugin_zabbix::db::mysql_db (
   $enforce_sql = false
 ) {
 
+  class { 'mysql::server':
+    custom_setup_class => 'zabbix_mysql',
+  }
+
   database { $name:
     ensure   => present,
     charset  => $charset,
     provider => 'mysql',
+    require  => Package['mysql-server'],
   }
 
   database_user { "${user}@${host}":
     ensure        => present,
-    password_hash => mysql_password($password),
+    password_hash => mysql_password('teddy66'),
     provider      => 'mysql',
     require       => Database[$name],
   }
@@ -50,7 +55,7 @@ define plugin_zabbix::db::mysql_db (
       logoutput   => true,
       refreshonly => $refresh,
       require     => Database_grant["${user}@${host}/${name}"],
-      subscribe   => Database[$name],
+      # subscribe   => Database[$name],
     }
   }
 

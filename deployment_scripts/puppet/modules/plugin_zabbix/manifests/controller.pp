@@ -16,7 +16,9 @@
 class plugin_zabbix::controller {
 
   include plugin_zabbix::params
+
   $host = regsubst($plugin_zabbix::params::db_ip,'^(\d+\.\d+\.\d+\.)\d+','\1%')
+
 
   file { '/etc/dbconfig-common':
     ensure => directory,
@@ -43,32 +45,15 @@ class plugin_zabbix::controller {
     content => template($plugin_zabbix::params::server_config_template),
   }
 
-  file { 'zabbix-server-ocf' :
-    ensure => present,
-    path   => "${plugin_zabbix::params::ocf_scripts_dir}/${plugin_zabbix::params::ocf_scripts_provider}/${plugin_zabbix::params::server_service}",
-    mode   => '0755',
-    owner  => 'root',
-    group  => 'root',
-    source => 'puppet:///modules/plugin_zabbix/zabbix-server.ocf',
-  }
-  service { "${plugin_zabbix::params::server_service}-init-stopped":
-    ensure  => 'stopped',
-    name    => $plugin_zabbix::params::server_service,
-    enable  => false,
-    require => File[$plugin_zabbix::params::server_config],
-  }
-  service { "${plugin_zabbix::params::server_service}-started":
+  service { 'zabbix-server':
     ensure   => running,
-    name     => "p_${plugin_zabbix::params::server_service}",
+    name     => 'zabbix-server',
     enable   => true,
-    provider => 'pacemaker',
   }
-
-  File['zabbix-server-ocf'] -> Service["${plugin_zabbix::params::server_service}-init-stopped"] -> Service["${plugin_zabbix::params::server_service}-started"]
 
   sysctl::value { 'kernel.shmmax':
     value  => $plugin_zabbix::params::sysctl_kernel_shmmax,
-    notify => Service["${plugin_zabbix::params::server_service}-started"],
+    notify => Service['zabbix-server'],
   }
 
   plugin_zabbix::db::mysql_db { $plugin_zabbix::params::db_name:
@@ -80,11 +65,8 @@ class plugin_zabbix::controller {
   if $plugin_zabbix::params::frontend {
     class { 'plugin_zabbix::frontend':
       require => File[$plugin_zabbix::params::server_config],
-      before  => Class['plugin_zabbix::ha::haproxy'],
     }
   }
-
-  include plugin_zabbix::ha::haproxy
 
   firewall { '998 zabbix agent vip':
     proto  => 'tcp',

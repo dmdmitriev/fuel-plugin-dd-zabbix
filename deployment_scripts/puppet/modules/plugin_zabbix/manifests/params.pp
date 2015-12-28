@@ -125,11 +125,11 @@ class plugin_zabbix::params {
 
   #common parameters
   $db_type                           = 'MYSQL'
-  $db_ip                             = hiera('management_vip')
+  $db_ip                             = 'localhost'
   $db_port                           = '3306'
   $db_name                           = 'zabbix'
   $db_user                           = 'zabbix'
-  $db_password                       = $zabbix_hash['db_password']
+  $db_password                       = 'teddy66'
 
   #zabbix hosts params
   $host_name                         = $::fqdn

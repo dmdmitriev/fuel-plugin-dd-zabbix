@@ -59,8 +59,8 @@ class plugin_zabbix::db::mysql(
   exec{ "${plugin_zabbix::params::db_name}-import":
     command     => "/usr/bin/mysql ${plugin_zabbix::params::db_name} < /tmp/zabbix/schema.sql",
     logoutput   => true,
-    refreshonly => true,
-    subscribe   => Database[$plugin_zabbix::params::db_name],
     require     => Exec['prepare-schema-2'],
+    subscribe   => Database[$plugin_zabbix::params::db_name],
+    refreshonly => true,
   }
 }

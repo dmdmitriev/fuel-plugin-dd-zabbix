@@ -84,12 +84,12 @@ class plugin_zabbix::frontend {
     }
     'Debian': {
 
-      exec { 'disable-apache-worker':
-        command => 'a2dismod worker',
-        path    => ['/usr/sbin', '/usr/bin', '/sbin', '/bin'],
-        notify  => Service[$plugin_zabbix::params::frontend_service],
-        require => Package[$plugin_zabbix::params::frontend_pkg],
-      }
+      # exec { 'disable-apache-worker':
+      #   command => 'a2dismod worker',
+      #   path    => ['/usr/sbin', '/usr/bin', '/sbin', '/bin'],
+      #   notify  => Service[$plugin_zabbix::params::frontend_service],
+      #   require => Package[$plugin_zabbix::params::frontend_pkg],
+      # }
 
       exec { 'enable-apache-prefork':
         command => 'a2enmod mpm_prefork',
@@ -118,7 +118,7 @@ class plugin_zabbix::frontend {
         provider => 'shell',
         before   => Package[$plugin_zabbix::params::frontend_pkg],
       }
-      file { '/etc/apache2/conf.d/zabbix.conf':
+      file { '/etc/apache2/sites-enabled/zabbix.conf':
         ensure  => link,
         target  => $plugin_zabbix::params::frontend_service_config,
         notify  => Service[$plugin_zabbix::params::frontend_service],
