@@ -129,7 +129,7 @@ class plugin_zabbix::params {
   $db_port                           = '3306'
   $db_name                           = 'zabbix'
   $db_user                           = 'zabbix'
-  $db_password                       = 'teddy66'
+  $db_password                       = $zabbix_hash['db_password']
 
   #zabbix hosts params
   $host_name                         = $::fqdn

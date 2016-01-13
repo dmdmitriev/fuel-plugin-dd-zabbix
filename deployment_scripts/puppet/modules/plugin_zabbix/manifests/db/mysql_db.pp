@@ -62,12 +62,5 @@ define plugin_zabbix::db::mysql_db (
 
   Package['mysql-server'] -> Exec['zabbix_user'] -> Exec['zabbix_grant']
 
-  # exec{ "${name}-import":
-  #   command     => "/usr/bin/mysql ${name} < ${sql}",
-  #   logoutput   => true,
-  #   refreshonly => $refresh,
-  #   subscribe   => Database[$name],
-  # }
-
 }
 
