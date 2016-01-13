@@ -18,46 +18,56 @@ define plugin_zabbix::db::mysql_db (
   $password,
   $charset     = 'utf8',
   $host        = 'localhost',
-  $grant       = 'all',
-  $sql         = '',
-  $enforce_sql = false
+  $user_file   = '/var/run/mysqld/zabbix_user',
+  $grant_file  = '/var/run/mysqld/zabbix_grant',
 ) {
 
-  class { 'mysql::server':
-    custom_setup_class => 'zabbix_mysql',
+  package { 'mysql-client':
+    ensure => present,
+    before => Package['mysql-server']
+  }
+
+  file { ['/etc/mysql',
+          '/etc/mysql/conf.d']:
+    ensure => directory,
+    before => Package['mysql-server']
+  }
+
+  package { 'mysql-server':
+    ensure => 'installed',
+  }
+
+  service { 'mysql':
+    ensure => 'running',
+    enable => true,
+    require => Package['mysql-server'],
   }
 
   database { $name:
-    ensure   => present,
-    charset  => $charset,
-    provider => 'mysql',
-    require  => Package['mysql-server'],
+    ensure    => present,
+    charset   => $charset,
+    provider  => 'mysql',
+    require   => Package['mysql-server'],
+  }
+  
+  exec { 'zabbix_user':
+    command => "/usr/bin/mysql mysql -e \"CREATE USER '${user}'@'localhost' IDENTIFIED BY '${password}'\"",
+    unless  => "/usr/bin/mysql mysql -e \"SELECT User FROM user WHERE user = '${name}'\"",
   }
 
-  database_user { "${user}@${host}":
-    ensure        => present,
-    password_hash => mysql_password('teddy66'),
-    provider      => 'mysql',
-    require       => Database[$name],
+  exec { 'zabbix_grant':
+    command => "/usr/bin/mysql mysql -e \"GRANT ALL ON ${name}.* TO '${user}'@'localhost'\"",
+    unless  => "/usr/bin/mysql mysql -e \"SHOW GRANTS FOR 'zabbix'@'localhost'\" | grep ALL",
   }
 
-  database_grant { "${user}@${host}/${name}":
-    privileges => $grant,
-    provider   => 'mysql',
-    require    => Database_user["${user}@${host}"],
-  }
+  Package['mysql-server'] -> Exec['zabbix_user'] -> Exec['zabbix_grant']
 
-  $refresh = ! $enforce_sql
-
-  if $sql {
-    exec{ "${name}-import":
-      command     => "/usr/bin/mysql ${name} < ${sql}",
-      logoutput   => true,
-      refreshonly => $refresh,
-      require     => Database_grant["${user}@${host}/${name}"],
-      # subscribe   => Database[$name],
-    }
-  }
+  # exec{ "${name}-import":
+  #   command     => "/usr/bin/mysql ${name} < ${sql}",
+  #   logoutput   => true,
+  #   refreshonly => $refresh,
+  #   subscribe   => Database[$name],
+  # }
 
 }
 
