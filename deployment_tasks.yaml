@@ -1,23 +1,39 @@
-#[]
-- id: zabbix
+- id: dd-zabbix
   type: group
-  role: [zabbix]
-  tasks: [hiera, globals, tools, logging, netconfig, hosts, deploy_start]
-  required_for: [deploy_end]
+  role: [dd-zabbix]
   requires: [deploy_start]
+  required_for: [deploy_end]
+  tasks: [hiera, globals, tools, logging, netconfig, hosts, deploy_start]
   parameters:
     strategy:
       type: one_by_one
 
-# - id: zabbix-server
-#   type: puppet
-#   groups: [zabbix]
-#   required_for: [deploy_end]
-#   requires: [deploy_start, hosts]
-#   parameters:
-#     puppet_manifest: puppet/manifests/zabbix_server_config.pp
-#     puppet_modules: puppet/modules:/etc/puppet/modules
-#     timeout: 600
+- id: dd-zabbix-primary-controller
+  type: puppet
+  groups: [dd-zabbix]
+  requires: [deploy_start]
+  required_for: [deploy_end]
+  parameters:
+    puppet_manifest: puppet/manifests/primary_controller.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 360
 
-#     puppet_manifest: puppet/manifests/zabbix_server_config.pp
-#     puppet_modules: puppet/modules:/etc/puppet/modules
+- id: dd-zabbix-controller
+  type: puppet
+  groups: [dd-zabbix]
+  required_for: [deploy_end]
+  requires: [deploy_start, dd-zabbix-primary-controller]
+  parameters:
+    puppet_manifest: puppet/manifests/controller.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 360
+
+- id: dd-zabbix-config
+  type: puppet
+  groups: [dd-zabbix]
+  required_for: [deploy_end]
+  requires: [deploy_start, dd-zabbix-controller]
+  parameters:
+    puppet_manifest: puppet/manifests/zabbix_server_config.pp
+    puppet_modules: puppet/modules:/etc/puppet/modules
+    timeout: 360

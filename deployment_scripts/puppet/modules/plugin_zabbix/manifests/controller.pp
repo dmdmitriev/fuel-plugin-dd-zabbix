@@ -49,6 +49,7 @@ class plugin_zabbix::controller {
     ensure   => running,
     name     => 'zabbix-server',
     enable   => true,
+    require  => Package[$plugin_zabbix::params::server_pkg]
   }
 
   sysctl::value { 'kernel.shmmax':
@@ -61,6 +62,8 @@ class plugin_zabbix::controller {
     password => $plugin_zabbix::params::db_password,
     host     => $host,
   }
+
+  Plugin_zabbix::Db::Mysql_db[$plugin_zabbix::params::db_name] -> Package[$plugin_zabbix::params::server_pkg]
 
   if $plugin_zabbix::params::frontend {
     class { 'plugin_zabbix::frontend':

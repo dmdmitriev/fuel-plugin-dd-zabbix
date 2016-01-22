@@ -1,6 +1,6 @@
-zabbix:
+dd-zabbix:
   name: "Zabbix server"
-  description: "Zabbix dedicated server"
+  description: "Standalone Zabbix server"
   conflicts:
     - controller
     - compute

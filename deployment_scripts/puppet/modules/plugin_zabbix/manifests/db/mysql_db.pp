@@ -18,8 +18,6 @@ define plugin_zabbix::db::mysql_db (
   $password,
   $charset     = 'utf8',
   $host        = 'localhost',
-  $user_file   = '/var/run/mysqld/zabbix_user',
-  $grant_file  = '/var/run/mysqld/zabbix_grant',
 ) {
 
   package { 'mysql-client':
@@ -34,7 +32,7 @@ define plugin_zabbix::db::mysql_db (
   }
 
   package { 'mysql-server':
-    ensure => 'installed',
+    ensure => present,
   }
 
   service { 'mysql':
@@ -60,7 +58,7 @@ define plugin_zabbix::db::mysql_db (
     unless  => "/usr/bin/mysql mysql -e \"SHOW GRANTS FOR 'zabbix'@'localhost'\" | grep ALL",
   }
 
-  Package['mysql-server'] -> Exec['zabbix_user'] -> Exec['zabbix_grant']
+   Package['mysql-server'] -> Exec['zabbix_user'] -> Exec['zabbix_grant']
 
 }
 

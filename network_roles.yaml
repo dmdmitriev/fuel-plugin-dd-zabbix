@@ -6,3 +6,4 @@
     vip:
       - name: "zbx_vip_mgmt"
         namespace: "haproxy"
+        node_roles: ["zabbix"]

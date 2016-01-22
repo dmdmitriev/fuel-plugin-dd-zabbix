@@ -17,12 +17,6 @@ class plugin_zabbix::primary_controller {
 
   include plugin_zabbix::controller
 
-  class { 'plugin_zabbix::db':
-    db_ip       => $plugin_zabbix::params::db_ip,
-    db_password => $plugin_zabbix::params::db_password,
-    require     => Package[$plugin_zabbix::params::server_pkg],
-  }
-
   $operations = {
     'monitor' => {'interval' => '5s', 'timeout' => '30s' },
     'start'   => {'interval' => '0', 'timeout' => '30s' }

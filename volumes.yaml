@@ -1,5 +1,5 @@
 volumes:
-  - id: "zabbix"
+  - id: "dd-zabbix"
     type: "vg"
     min_size:
       generator: "calc_gb_to_mb"
@@ -12,9 +12,9 @@ volumes:
         file_system: "ext4"
         size:
           generator: "calc_total_vg"
-          generator_args: ["zabbix"]
+          generator_args: ["dd-zabbix"]
 
 volumes_roles_mapping:
-  zabbix:
+  dd-zabbix:
     - {allocate_size: "min", id: "os"}
-    - {allocate_size: "all", id: "zabbix"}
+    - {allocate_size: "all", id: "dd-zabbix"}
